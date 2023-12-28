@@ -57,7 +57,7 @@ class PowerUp(Entity):
         super().tick()
         age = self.lifetime - self.life
         if age < highlight_duration: # highlight exists for 0.5s
-            
+
             # Sadly lines don't support transparency
             # pygame.draw.line(screen, pygame.color.Color(255, 0, 0, round(age / FPS * 255)), (0, self.rect.y), (WIDTH, self.rect.y), 10)
             # pygame.draw.line(screen, pygame.color.Color(255, 0, 0, round(age / FPS * 255)), (self.rect.x, 0), (self.rect.x, HEIGHT), 10)
@@ -66,11 +66,11 @@ class PowerUp(Entity):
 
             vline = pygame.Surface((highlight_width, HEIGHT), pygame.SRCALPHA)
             vline.fill((255, 0, 0, alpha))
-            screen.blit(vline, (self.rect.centerx - highlight_width / 2, 0))
+            buffer.blit(vline, (self.rect.centerx - highlight_width / 2, 0))
             
             hline = pygame.Surface((WIDTH, highlight_width), pygame.SRCALPHA)
             hline.fill((255, 0, 0, alpha))
-            screen.blit(hline, (0, self.rect.centery - highlight_width / 2))
+            buffer.blit(hline, (0, self.rect.centery - highlight_width / 2))
 
 
     def check_mouse(self, mouse):
@@ -84,11 +84,15 @@ class PowerUp(Entity):
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
+buffer = pygame.surface.Surface((WIDTH, HEIGHT), pygame.SRCALPHA) # for the wobble effect
 
 entities = pygame.sprite.Group()
 
 score = 0
 timer = 10
+wobble = 0 # how many ticks left to wobble
+wobble_by = 3
+wobble_for = FPS * 0.5
 
 def gen_next_powerup():
     # Generate powerup in X to Y seconds
@@ -131,16 +135,27 @@ while running:
         entity.tick()
 
     entities.update() 
-    entities.draw(screen)
+    entities.draw(buffer)
 
     if timer <= next_powerup:
         next_powerup = gen_next_powerup()
         PowerUp()
+        wobble += wobble_for
         
-    screen.blit(font.render(f"Score: {score} | Time: {timer}s", False, (0, 0, 0)), (0, 0))
-    pygame.draw.circle(screen, (255, 0, 0), pygame.mouse.get_pos(), radius=10) # helpful (?) dot
+    pygame.draw.circle(buffer, (255, 0, 0), pygame.mouse.get_pos(), radius=10) # helpful (?) dot
 
-    pygame.display.flip() 
+    if wobble:
+        wobble -= 1
+        screen.blit(buffer, (random.randint(-wobble_by, wobble_by), random.randint(-wobble_by, wobble_by)))
+    else:
+        screen.blit(buffer, (0, 0))
+
+    # Text above everything else
+    screen.blit(font.render(f"Score: {score} | Time: {timer}s", False, (0, 0, 0)), (0, 0))
+
+    pygame.display.flip()
+    buffer.fill((0, 0, 0, 0))
+
     clock.tick(FPS)
 
 # end screen
