@@ -16,6 +16,10 @@ font = pygame.font.SysFont("Comic Sans MS", 20)
 def load_small(path: str, scale=(80, 80)):
     return pygame.transform.scale(pygame.image.load(path), scale)
 
+def load_shrink(path: str, by: int):
+    image = pygame.image.load(path)
+    return pygame.transform.scale(image, (image.get_width() // by, image.get_height() // by))
+
 # Sprites
 
 class Entity(pygame.sprite.Sprite):
@@ -51,7 +55,7 @@ class Mole(Entity):
         self.kill()
 
     def check_mouse(self, mouse):
-        if self.rect.collidepoint(mouse):
+        if self.rect.collidepoint(mouse) or self.rect.colliderect(hammer.rect):
             # screen will be too messy ... uncomment at your own risk!
             # Cross(*self.rect.center, (0, 0, 255))
             self.die()
@@ -220,6 +224,39 @@ class BlinkLine(pygame.sprite.Sprite):
         if self.life <= 0:
             self.kill()
 
+class Hammer(pygame.sprite.Sprite):
+    image_original = load_shrink("assets/hammer.png", 7)
+
+    def __init__(self):
+        super().__init__()
+        self.image = self.image_original
+        self.rect = self.image.get_rect()
+        self.state = 0
+        # 0-1: normal
+        # 2-3: rotating back to normal
+        # 4-5: whack (rotate max)
+        # 6-7: rotating to whack
+
+        # everything.add(self) do not draw on buffer
+
+    def update(self):
+        if self.state in (2, 3, 6, 7):
+            self.image = pygame.transform.rotate(self.image_original, 45)
+        elif self.state in (4, 5):
+            self.image = pygame.transform.rotate(self.image_original, 90)
+        else:
+            self.image = self.image_original
+
+        x, y = pygame.mouse.get_pos()
+        self.rect.centerx = x
+        self.rect.centery = y
+
+        if self.state > 0:
+            self.state -= 1
+
+        screen.blit(self.image, self.rect)
+
+
 # Setup
 
 pygame.init()
@@ -256,6 +293,7 @@ pygame.time.set_timer(FOX_WALK, 50)
 
 # Game loop
 
+hammer = Hammer()
 Mole() # no need to wait 1 second for first mole
 
 running = True
@@ -277,6 +315,7 @@ while running:
             for fox in foxes:
                 fox.walk()
         elif event.type == pygame.MOUSEBUTTONDOWN:
+            hammer.state = 7
             for entity in entities:
                 entity.check_mouse(event.pos)
 
@@ -296,6 +335,8 @@ while running:
         screen.blit(buffer, (random.randint(-wobble_by, wobble_by), random.randint(-wobble_by, wobble_by)))
     else:
         screen.blit(buffer, (0, 0))
+    
+    hammer.update()
 
     # Text not affected by wobble
     screen.blit(font.render(f"Score: {score} | Time: {timer}s", False, (0, 0, 0)), (0, 0))
