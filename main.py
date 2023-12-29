@@ -83,8 +83,10 @@ class PowerUp(Entity):
 def powerup_time():
     global timer
     timer += 5
+    BlinkLine(BlinkLine.width // 2, "#f2c30a")
 
 def powerup_fox():
+    Fox()
     Fox()
     Fox()
     Fox()
@@ -131,7 +133,7 @@ class Fox(pygame.sprite.Sprite):
 
 class Wind(pygame.sprite.Sprite):
     image_original = load_small("powerup_wind.png", (150, 150))
-    duration = FPS * 3
+    lifetime = FPS * 3
     turn_by = -30
 
     def __init__(self):
@@ -139,7 +141,7 @@ class Wind(pygame.sprite.Sprite):
         self.image = self.image_original
         self.rect = self.image.get_rect()
         self.angle = 0
-        self.life = self.duration
+        self.life = self.lifetime
 
         everything.add(self)
         winds.add(self)
@@ -161,7 +163,7 @@ class Wind(pygame.sprite.Sprite):
 class Cross(pygame.sprite.Sprite):
     # cross effect
     width = 10
-    duration = FPS / 2
+    lifetime = FPS / 2
 
     def __init__(self, x, y, color):
         super().__init__()
@@ -170,14 +172,14 @@ class Cross(pygame.sprite.Sprite):
         self.color = pygame.Color(color)
         self.image = pygame.surface.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
         self.rect = self.image.get_rect()
-        self.life = FPS / 2
+        self.life = FPS // 2
 
         everything.add(self)
 
     def update(self):
         self.image.fill((0, 0, 0, 0))
         
-        alpha = round(self.life / self.duration * 255)
+        alpha = round(self.life / self.lifetime * 255)
         self.color.a = alpha
 
         vline = pygame.Surface((self.width, HEIGHT), pygame.SRCALPHA)
@@ -192,6 +194,32 @@ class Cross(pygame.sprite.Sprite):
         if self.life <= 0:
             self.kill()
 
+class BlinkLine(pygame.sprite.Sprite):
+    width = 30
+    lifetime = FPS
+
+    def __init__(self, y, color):
+        super().__init__()
+        self.y = y
+        self.color = pygame.Color(color)
+        self.image = pygame.surface.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        self.rect = self.image.get_rect()
+        self.life = self.lifetime
+
+        everything.add(self)
+
+    def update(self):
+        self.image.fill((0, 0, 0, 0))
+
+        self.color.a = round(self.life % 6 / 6) * 255
+        hline = pygame.Surface((WIDTH, self.width), pygame.SRCALPHA)
+        hline.fill(self.color)
+        self.image.blit(hline, (0, self.y - self.width / 2))
+
+        self.life -= 1
+        if self.life <= 0:
+            self.kill()
+
 # Setup
 
 pygame.init()
@@ -201,7 +229,7 @@ buffer = pygame.surface.Surface((WIDTH, HEIGHT), pygame.SRCALPHA) # for the wobb
 
 everything = pygame.sprite.Group() # everything that needs to be drawn
 entities = pygame.sprite.Group() # interactive and updates per tick
-foxes = pygame.sprite.Group() # separate as foxes aren't interactive
+foxes = pygame.sprite.Group()
 winds = pygame.sprite.Group()
 
 score = 0
@@ -270,6 +298,13 @@ while running:
 
     # Text not affected by wobble
     screen.blit(font.render(f"Score: {score} | Time: {timer}s", False, (0, 0, 0)), (0, 0))
+
+    # Alternative display, unused
+    # timer_text = font.render(f"Time: {timer}s", False, (0, 0, 0))
+    # timer_rect = timer_text.get_rect()
+    # timer_rect.y = 0
+    # timer_rect.x = WIDTH - timer_rect.width - 10
+    # screen.blit(timer_text, timer_rect)
 
     pygame.display.flip()
     buffer.fill((0, 0, 0, 0)) # clear the buffer
