@@ -43,7 +43,7 @@ class Entity(pygame.sprite.Sprite):
     def check_mouse(self, mouse: tuple[int, int]): ...
 
 class Mole(Entity):
-    image = load_small("mole.png")
+    image = load_small("assets/mole.png")
 
     def die(self):
         global score
@@ -96,14 +96,14 @@ def powerup_wind():
     Wind()
 
 powerups = [
-    (load_small("powerup_time.png"), powerup_time),
-    (load_small("powerup_fox.png"), powerup_fox),
-    (load_small("powerup_wind.png"), powerup_wind)
+    (load_small("assets/powerup_time.png"), powerup_time),
+    (load_small("assets/powerup_fox.png"), powerup_fox),
+    (load_small("assets/powerup_wind.png"), powerup_wind)
 ]
 
 fox_images: list[pygame.surface.Surface] = []
 for x in range(7):
-    image = pygame.image.load(f"fox/{x}.png")
+    image = pygame.image.load(f"assets/fox/{x}.png")
     fox_images.append(pygame.transform.scale(image, (image.get_width() // 3, image.get_height() // 3)))
 
 class Fox(pygame.sprite.Sprite):    
@@ -132,7 +132,7 @@ class Fox(pygame.sprite.Sprite):
             self.kill()
 
 class Wind(pygame.sprite.Sprite):
-    image_original = load_small("powerup_wind.png", (150, 150))
+    image_original = load_small("assets/powerup_wind.png", (150, 150))
     lifetime = FPS * 3
     turn_by = -30
 
@@ -287,7 +287,8 @@ while running:
         next_powerup = gen_next_powerup()
         PowerUp(*random.choice(powerups))
         wobble += wobble_for
-        
+    
+    # cursor indicator
     pygame.draw.circle(buffer, (255, 0, 0), pygame.mouse.get_pos(), radius=10) # helpful (?) dot
 
     if wobble:
