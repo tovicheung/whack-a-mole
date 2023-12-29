@@ -46,19 +46,22 @@ class Entity(pygame.sprite.Sprite):
 class Mole(Entity):
     image = load_small("mole_final.png")
 
+    def die(self):
+        global score
+        score += 1
+        self.kill()
+
     def check_mouse(self, mouse):
         if self.rect.collidepoint(mouse):
-            global score
-            score += 1
             # screen will be too messy ... uncomment at your own risk!
             # Cross(*self.rect.center, (0, 0, 255))
-            self.kill()
+            self.die()
 
     def update(self):
         super().update()
         if pygame.sprite.spritecollideany(self, foxes) is not None:
-            Cross(*self.rect.center, (0, 0, 255))
-            self.kill()
+            Cross(*self.rect.center, "#ff6d00")
+            self.die()
 
 highlight_width = 10
 highlight_duration = FPS / 2
@@ -147,12 +150,13 @@ class Fox(pygame.sprite.Sprite):
 class Cross(pygame.sprite.Sprite):
     # cross effect
     width = 10
+    duration = FPS / 2
 
     def __init__(self, x, y, color):
         super().__init__()
         self.x = x
         self.y = y
-        self.color = color
+        self.color = pygame.Color(color)
         self.image = pygame.surface.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
         self.rect = self.image.get_rect()
         self.life = FPS / 2
@@ -162,14 +166,15 @@ class Cross(pygame.sprite.Sprite):
     def update(self):
         self.image.fill((0, 0, 0, 0))
         
-        alpha = round(self.life / highlight_duration * 255)
+        alpha = round(self.life / self.duration * 255)
+        self.color.a = alpha
 
         vline = pygame.Surface((self.width, HEIGHT), pygame.SRCALPHA)
-        vline.fill((*self.color, alpha))
+        vline.fill(self.color)
         self.image.blit(vline, (self.x - self.width / 2, 0))
         
         hline = pygame.Surface((WIDTH, self.width), pygame.SRCALPHA)
-        hline.fill((*self.color, alpha))
+        hline.fill(self.color)
         self.image.blit(hline, (0, self.y - self.width / 2))
         
         self.life -= 1
