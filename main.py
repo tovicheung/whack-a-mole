@@ -327,8 +327,8 @@ while running:
         PowerUp(*random.choice(powerups))
         wobble += wobble_for
     
-    # cursor indicator
-    pygame.draw.circle(buffer, (255, 0, 0), pygame.mouse.get_pos(), radius=10) # helpful (?) dot
+    # cursor indicator (replaced by hammer)
+    # pygame.draw.circle(buffer, (255, 0, 0), pygame.mouse.get_pos(), radius=10)
 
     if wobble:
         wobble -= 1
