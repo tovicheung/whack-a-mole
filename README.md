@@ -1,4 +1,4 @@
-# Whack a mole
+# Whack a mole (on steroids)
 This is a game I made for my CS50 final project
 
 ## Play the game
