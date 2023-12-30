@@ -1,5 +1,5 @@
 # Whack a mole (on steroids)
-This is a game I made for my CS50 final project
+This is whack a mole with additional powerups I made for my CS50 final project.
 
 ## Play the game
 1. Clone the repo
@@ -13,11 +13,13 @@ python3 main.py
 ```
 
 ## How to play?
-- Click to whack a mole
-- Click to collect power-ups
-    - Hourglass: adds 5 seconds
-    - Fox: summon 5 foxes to eat moles
-    - Wind: summon a hurricane that follows the cursor (no need to click to kill the moles)
+Move the mouse and click!
+
+## Power-Ups
+The power-ups are fun (and somewhat silly lol)
+- Hourglass: adds 5 seconds
+- Fox: summon 5 foxes to eat moles
+- Wind: summon a hurricane that follows the cursor (no need to click to kill the moles)
 
 ## Screenshots
 Power-up spawned (fox)
